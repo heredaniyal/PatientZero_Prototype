@@ -17,7 +17,7 @@ public class PlayerInteract : MonoBehaviour
         }
     }
 
-    void ShootRay()
+    void ShootRay() // updated
     {
         Ray ray = new Ray(transform.position, transform.forward);
         RaycastHit hit;
@@ -37,6 +37,13 @@ public class PlayerInteract : MonoBehaviour
                 {
                     Debug.Log("✅ FOUND ITEM! Trying to pickup...");
                     item.OnInteract();
+                    return;
+                }
+                // 2. Check for Door
+                DoorController door = hit.collider.GetComponent<DoorController>();
+                if (door != null)
+                {
+                    door.TryOpen();
                 }
                 else
                 {
