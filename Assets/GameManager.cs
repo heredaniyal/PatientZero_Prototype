@@ -6,23 +6,48 @@ public class SoundManager : MonoBehaviour
 
     void Awake()
     {
-        if (Instance == null) Instance = this;
-        else Destroy(gameObject);
+        if (Instance == null)
+        {
+            Instance = this;
+            Debug.Log("✅ SoundManager Instance Created");
+        }
+        else
+        {
+            Destroy(gameObject);
+        }
     }
 
     public void MakeNoise(Vector3 position, float range)
     {
-        // Debug: Scene view mein yellow sphere dikhayega range check karne ke liye
-        // Filhal hum invisible physics check laga rahe hain
+        Debug.Log($"🔊 MakeNoise called: pos={position}, range={range}m");
+        
         Collider[] hitColliders = Physics.OverlapSphere(position, range);
+        Debug.Log($"   Found {hitColliders.Length} colliders in sphere");
 
-        foreach (var hitCollider in hitColliders)
+        int zombiesFound = 0;
+        foreach (var col in hitColliders)
         {
-            if (hitCollider.CompareTag("Enemy")) // "Enemy" tag zaroori hai!
+            Debug.Log($"   - {col.name} (Tag: '{col.tag}')");
+            
+            if (col.CompareTag("Enemy"))
             {
-                // Zombie mil gaya, usay signal bhejo
-                hitCollider.GetComponent<ZombieAI>().HearSound(position);
+                zombiesFound++;
+                ZombieAI zombie = col.GetComponent<ZombieAI>();
+                if (zombie != null)
+                {
+                    zombie.HearSound(position);
+                    Debug.Log($"   ✅ Zombie notified: {col.name}");
+                }
+                else
+                {
+                    Debug.LogWarning($"   ⚠️ {col.name} has Enemy tag but NO ZombieAI!");
+                }
             }
+        }
+        
+        if (zombiesFound == 0)
+        {
+            Debug.LogWarning("⚠️ NO ZOMBIES WITH 'Enemy' TAG FOUND IN RANGE!");
         }
     }
 }

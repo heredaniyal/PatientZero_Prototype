@@ -9,55 +9,37 @@ public class PlayerInteract : MonoBehaviour
 
     void Update()
     {
-        // 1. Check Input
+        // 'E' Key check
         if (Keyboard.current.eKey.wasPressedThisFrame)
         {
-            Debug.Log("🟢 E Key Pressed!"); // Agar ye print na ho, to Input masla hai
-            ShootRay();
+            Debug.Log("🟢 E Key Pressed!");
+            ExecuteInteraction();
         }
     }
 
-    void ShootRay() // updated
+    void ExecuteInteraction()
     {
         Ray ray = new Ray(transform.position, transform.forward);
-        RaycastHit hit;
-
-        // Visual debug (Scene view mein laal line dekho)
-        Debug.DrawRay(transform.position, transform.forward * interactRange, Color.red, 2f);
-
-        if (Physics.Raycast(ray, out hit, interactRange))
+        
+        // Raycast sirf Interactable layer ko hit karega
+        if (Physics.Raycast(ray, out RaycastHit hit, interactRange, interactLayer))
         {
-            Debug.Log("⚠️ Ray hit: " + hit.collider.name + " (Layer: " + LayerMask.LayerToName(hit.collider.gameObject.layer) + ")");
+            Debug.Log("⚠️ Ray hit: " + hit.collider.name);
 
-            // Check if object is in the right layer
-            if (((1 << hit.collider.gameObject.layer) & interactLayer) != 0)
+            // 1. Check for Items (Ammo/Key)
+            if (hit.collider.TryGetComponent(out PickupItem item))
             {
-                PickupItem item = hit.collider.GetComponent<PickupItem>();
-                if (item != null)
-                {
-                    Debug.Log("✅ FOUND ITEM! Trying to pickup...");
-                    item.OnInteract();
-                    return;
-                }
-                // 2. Check for Door
-                DoorController door = hit.collider.GetComponent<DoorController>();
-                if (door != null)
-                {
-                    door.TryOpen();
-                }
-                else
-                {
-                    Debug.Log("❌ Object is on Interactable layer BUT missing PickupItem script!");
-                }
+                item.OnInteract();
+            }
+            // 2. Check for Door (IMPORTANT: Checking Parent too!)
+            else if (hit.collider.GetComponentInParent<DoorController>() != null)
+            {
+                hit.collider.GetComponentInParent<DoorController>().TryOpen();
             }
             else
             {
-                Debug.Log("❌ Hit object is NOT on Interactable Layer. Check Inspector settings!");
+                Debug.Log("❌ Hit an Interactable but no valid script found!");
             }
-        }
-        else
-        {
-            Debug.Log("❌ Ray hit NOTHING. Get closer or aim better.");
         }
     }
 }

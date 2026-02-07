@@ -3,18 +3,17 @@ using UnityEngine.SceneManagement;
 
 public class WinLogic : MonoBehaviour
 {
-    // This runs when something walks INTO the green box (ESCAPING)
-    void OnTriggerEnter(Collider other) // other is just a variable name
+    // [E] Is trigger par sirf tab kaam ho jab door open ho
+    void OnTriggerEnter(Collider other)
     {
-        // Check if it is the Player
-        if (other.gameObject.name == "PlayerCapsule")
+        // 1. Tag check (Best Practice)
+        if (other.CompareTag("Player"))
         {
-            Debug.Log("YOU ESCAPED! WINNER!"); // output statement
+            Debug.Log("🏆 YOU ESCAPED! WINNER!");
             
-            // For now, we just restart the game (or load a Main Menu later)
-            // Ideally, you would load a "Scene_Win" here.
-            // Need to Talk with the Team here.
-            SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+            // 2. Win screen par bhejo (Build Settings mein scene add hona chahiye)
+            // Agar Scene_Win nahi hai toh filhaal Restart chalne do:
+            SceneManager.LoadScene(SceneManager.GetActiveScene().name); 
         }
     }
 }
